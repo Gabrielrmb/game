@@ -12,7 +12,7 @@ class Menu():
     def __init__(self, window):
 
         self.window = window
-        self.surf = pygame.image.load('./assets/menubg.png').convert()
+        self.surf = pygame.image.load('./assets/menubg.png').convert_alpha()
         self.surf = pygame.transform.scale(self.surf, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def run(self):
@@ -46,25 +46,13 @@ class Menu():
                             menu_option = 0
 
                     if event.key == pygame.K_UP:
-                        if menu_option > 0 :
+                        if menu_option > 0:
                             menu_option -= 1
 
                         else:
                             menu_option = len(MENU_OPTION) - 1
                     if event.key == pygame.K_RETURN:
                         return MENU_OPTION[menu_option]
-
-
-
-
-
-
-
-
-
-
-
-
 
     def menu_text(self, text_size: int, text: str, text_color: tuple, text_center_pos: tuple):
         text_font: Font = pygame.font.SysFont(name="Helvética", size=text_size)

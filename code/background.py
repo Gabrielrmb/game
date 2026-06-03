@@ -1,6 +1,6 @@
 import pygame.transform
 
-from code.const import WINDOW_WIDTH, WINDOW_HEIGHT, ENTITY_SPEED
+from code.const import WINDOW_WIDTH, WINDOW_HEIGHT
 from code.entity import Entity
 
 class Background(Entity):
@@ -10,6 +10,6 @@ class Background(Entity):
         self.rect = self.surf.get_rect(left = position [0], top = position[1])
 
     def move(self, ):
-        self.rect.centerx -= ENTITY_SPEED[self.name]
+        self.rect.centerx -= 0
         if self.rect.right <= 0:
             self.rect.left = WINDOW_WIDTH
