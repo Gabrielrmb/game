@@ -25,6 +25,8 @@ class Player(Entity):
         attack_frame_width = attack_sheet.get_width() // 5
         attack_frame_height = attack_sheet.get_height()
 
+        #Sound Attack:
+        self.sword_attack_sound = pygame.mixer.Sound('./assets/swordAttack.mp3')
 
         for i in range(5):
             frame = attack_sheet.subsurface( i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
@@ -74,6 +76,7 @@ class Player(Entity):
             self.attacking = True
             self.attack_key_pressed = True
             self.attack_frame = 0
+            self.sword_attack_sound.play()
             return
         if not pressed_key[pygame.K_SPACE]:
             self.attack_key_pressed = False

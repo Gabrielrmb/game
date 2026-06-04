@@ -1,5 +1,8 @@
+from random import random, randint
+
 from code.background import Background
 from code.const import WINDOW_WIDTH, WINDOW_HEIGHT
+from code.enemy import Enemy
 from code.player import Player
 
 
@@ -20,3 +23,5 @@ class EntityFactory:
                 return list_bg
             case'player':
                 return Player('PlayerWalk', (10, WINDOW_HEIGHT / 2) )
+            case'enemy':
+                return Enemy('EnemyWalk', (WINDOW_WIDTH - 200, WINDOW_HEIGHT // 2))

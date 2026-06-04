@@ -4,9 +4,12 @@ import pygame
 from pygame import Surface, Rect
 from pygame.font import Font
 
+
 from code.const import WINDOW_WIDTH, WINDOW_HEIGHT, C_GRAY, TIMEOUT_LEVEL
+from code.enemy import Enemy
 from code.entity import Entity
 from code.entityfactory import EntityFactory
+from code.player import Player
 
 
 class Level:
@@ -16,8 +19,11 @@ class Level:
         self.game_mode = game_mode
         self.entity_list: list[Entity] = []
         self.entity_list.extend(EntityFactory.get_entity('level1bg'))
+        self.entity_list.append(EntityFactory.get_entity('enemy'))
         self.entity_list.append(EntityFactory.get_entity('player'))
+
         self.timeout = TIMEOUT_LEVEL
+
 
     def run(self):
         pygame.mixer_music.load(f'./assets/{self.name}.mp3')
@@ -26,16 +32,25 @@ class Level:
 
         while True:
             clock.tick(60)
+
+            player = next(ent for ent in self.entity_list if isinstance(ent, Player))
+
             for ent in self.entity_list:
-                ent.move()
+                if isinstance(ent, Enemy):
+                    ent: Enemy
+                    ent.chase(player.rect)
+                else:
+                    ent.move()
+
                 self.window.blit(source = ent.surf, dest = ent.rect)
 
-            pygame.display.flip()
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
 
             self.level_text(14, f'{self.name} - Timeout: {self.timeout / 1000:.1f}s', C_GRAY, (10, 5))
             self.level_text(14, f'fps: {clock.get_fps():.0f}', C_GRAY, (10, WINDOW_HEIGHT - 35))
