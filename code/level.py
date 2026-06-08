@@ -5,10 +5,12 @@ from pygame import Surface, Rect
 from pygame.font import Font
 
 
-from code.const import WINDOW_WIDTH, WINDOW_HEIGHT, C_GRAY, TIMEOUT_LEVEL
+from code.const import WINDOW_HEIGHT, C_GRAY, TIMEOUT_LEVEL
 from code.enemy import Enemy
 from code.entity import Entity
 from code.entityfactory import EntityFactory
+from code.entitymediator import EntityMediator
+
 from code.player import Player
 
 
@@ -27,8 +29,10 @@ class Level:
 
     def run(self):
         pygame.mixer_music.load(f'./assets/{self.name}.mp3')
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer_music.play(-1)
         clock = pygame.time.Clock()
+
 
         while True:
             clock.tick(60)
@@ -45,11 +49,15 @@ class Level:
                 self.window.blit(source = ent.surf, dest = ent.rect)
 
 
+            EntityMediator.verify_collision(self.entity_list)
+            EntityMediator.draw_hitbox(self.window, self.entity_list)
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
 
 
             self.level_text(14, f'{self.name} - Timeout: {self.timeout / 1000:.1f}s', C_GRAY, (10, 5))
