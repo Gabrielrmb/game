@@ -1,7 +1,7 @@
-from random import uniform
+
 import pygame
 from code.entity import Entity
-from code.const import ENEMY_SPRITE_SCALE, ENEMY_ATTACK_RANGE, ENEMY_VELOCITY
+from code.const import ENEMY_SPRITE_SCALE, ENEMY_ATTACK_RANGE, ENEMY_VELOCITY, ENEMY_HEALTH
 
 
 class Enemy(Entity):
@@ -31,12 +31,22 @@ class Enemy(Entity):
         attack_frame_width = attack_sheet.get_width() // 5
         attack_frame_height = attack_sheet.get_height()
 
+        #Health
+        self.health = ENEMY_HEALTH
+        self.max_health = ENEMY_HEALTH
+        self.dead_frames = []
+        self.dead_frame = 0
+        self.dead_speed = 0.08
+        self.dying = False
+        self.dead = False
+        dead_sheet = pygame.image.load('./assets/EnemyDead.png').convert_alpha()
+        dead_frame_width = dead_sheet.get_width() // 4
+        dead_frame_height = dead_sheet.get_height()
 
-        #Collision
-        self.hitbox = self.rect.inflate(-60, -20)
 
 
 
+        #Walk
         for i in range(7):
             frame = sprite_sheet.subsurface(i * frame_width, 0, frame_width, frame_height )
             frame = pygame.transform.scale(frame,(int(frame_width * ENEMY_SPRITE_SCALE), int(frame_height * ENEMY_SPRITE_SCALE)))
@@ -46,6 +56,7 @@ class Enemy(Entity):
         self.rect = self.surf.get_rect(topleft=position)
         self.hitbox = pygame.Rect(self.rect.x + 60, self.rect.y + 20, 60, 140)
 
+        #Attack
         for i in range(5):
             frame = attack_sheet.subsurface(i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
             frame = pygame.transform.scale(frame,(int(attack_frame_width * ENEMY_SPRITE_SCALE ), int(attack_frame_height * ENEMY_SPRITE_SCALE)))
@@ -53,6 +64,44 @@ class Enemy(Entity):
         self.surf = self.frames[0]
         self.rect = self.surf.get_rect(topleft = position)
 
+        #Dead
+        for i in range(4):
+            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height )
+            frame = pygame.transform.scale(frame,(int(dead_frame_width * ENEMY_SPRITE_SCALE),int(attack_frame_height * ENEMY_SPRITE_SCALE)))
+            self.dead_frames.append(frame)
+        self.surf = self.frames[0]
+        self.rect = self.surf.get_rect(topleft=position)
+
+    def take_damage(self, amount: int = 1):
+        if self.dead or self.dying:
+            return
+        self.health -= amount
+        if self.health <= 0:
+            self.health = 0
+            self.dying = True
+            self.dead_frame = 0
+            self.attack_hitbox = None
+
+    def enemy_health_bar(self, window: pygame.Surface):
+        bar_w, bar_h = 60, 8
+        bx = self.rect.centerx - bar_w // 2
+        by = self.rect.top - 14
+        pygame.draw.rect(window, (80, 0, 0), (bx, by, bar_w, bar_h))
+        filled = int(bar_w * self.health / self.max_health)
+        if filled > 0:
+            pygame.draw.rect(window, (220, 20, 60), (bx, by, filled, bar_h))
+        pygame.draw.rect(window, (200, 200, 200), (bx, by, bar_w, bar_h), 1)
+
+    def death_animation(self):
+        self.dead_frame += self.dead_speed
+        if self.dead_frame >= len(self.dead_frames):
+            self.dead = True
+            self.dying = False
+            return
+        feet = self.rect.midbottom
+        frame = self.dead_frames[int(self.dead_frame)]
+        self.surf = pygame.transform.flip(frame, True, False)
+        self.rect = self.surf.get_rect(midbottom=feet)
 
     def walk_animation(self, facing_left: bool):
         self.current_frame += self.animation_speed
@@ -88,7 +137,7 @@ class Enemy(Entity):
         if 3 <= int(self.attack_frame) <= 4:
             self.attack_hitbox = pygame.Rect(
                 self.rect.left - 10,
-                self.rect.top + 100 ,60, 70
+                self.rect.top + 100 ,80, 70
             )
         else:
             self.attack_hitbox = None
@@ -98,12 +147,23 @@ class Enemy(Entity):
         self.hitbox.bottom = self.rect.bottom
 
     def move(self):
+        if self.dying:
+            self.death_animation()
+            return
+        if self.dead:
+            return
+
         self.rect.centerx -= self.speed
         self.walk_animation(facing_left = True)
 
 
 
     def chase(self, player_rect: pygame.Rect):
+        if self.dying:
+            self.death_animation()
+            return
+        if self.dead:
+            return
 
         dx = player_rect.centerx - self.rect.centerx
         dy = player_rect.centery- self.rect.centery

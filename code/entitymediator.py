@@ -17,6 +17,11 @@ class EntityMediator:
         enemies_remove = []
         for ent in entity_list:
             if isinstance(ent, Enemy):
+                if ent.dead:
+                    enemies_remove.append(ent)
+                    continue
+                if ent.dying:
+                    continue
                 if player.attack_hitbox:
                     if player.attack_hitbox.colliderect(ent.hitbox):
 
@@ -24,17 +29,18 @@ class EntityMediator:
                             EntityMediator.sword_hit_sound.play()
                             player.hit_registered = True
                             print("inimigo atingido")
-                            enemies_remove.append(ent)
-                            # for enemy in enemies_remove:
-                            #     entity_list.remove(enemy) <---- remove o inimigo quando derrotado
+                            ent.take_damage(1)
 
-                if ent.attack_hitbox:  # ← fora do if player.attack_hitbox
+                if ent.attack_hitbox:
                     if ent.attack_hitbox.colliderect(player.hitbox):
                         if not ent.hit_registered:
                             ent.hit_registered = True
+                            player.take_damage(1)
 
                             print('Player atingido!')
 
+        for enemy in enemies_remove:
+            entity_list.remove(enemy)
 
 
 
@@ -48,7 +54,9 @@ class EntityMediator:
             pygame.draw.rect(window, (255,0,0), player.attack_hitbox, 2)
         if player:
             pygame.draw.rect(window, (0,0,255), player.hitbox, 2)
-
+        if player:
+            player.player_health_bar(window)
+            pygame.draw.rect(window, (0,255,0), player.hitbox, 2)
 
 
 
@@ -56,7 +64,10 @@ class EntityMediator:
         #enemy body hitbox
         for ent in entity_list:
             if isinstance(ent, Enemy):
-                pygame.draw.rect(window, (0,255,0), ent.hitbox, 2)
+                if not ent.dead:
+                    ent.enemy_health_bar(window)
+                if not ent.dead and not ent.dying:
+                    pygame.draw.rect(window, (0,255,0), ent.hitbox, 2)
 
                 if ent.attack_hitbox:
                     pygame.draw.rect(

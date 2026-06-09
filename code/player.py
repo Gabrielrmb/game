@@ -1,6 +1,6 @@
 import pygame
 
-from code.const import WINDOW_HEIGHT, PLAYER_MOVE_LIM, WINDOW_WIDTH, PLAYER_VELOCITY, PLAYER_SPRITE_SCALE
+from code.const import WINDOW_HEIGHT, PLAYER_MOVE_LIM, WINDOW_WIDTH, PLAYER_VELOCITY, PLAYER_SPRITE_SCALE, PLAYER_HEALTH
 from code.entity import Entity
 
 class Player(Entity):
@@ -31,23 +31,74 @@ class Player(Entity):
         self.sword_attack_sound = pygame.mixer.Sound('./assets/swordAttack.mp3')
         self.hit_registered = False
 
+        #health
+        self.health = PLAYER_HEALTH
+        self.max_health = PLAYER_HEALTH
+        self.dead_frames = []
+        self.dead_frame = 0
+        self.dead_speed = 0.06
+        self.dying = False
+        self.dead = False
+        dead_sheet = pygame.image.load('./assets/PlayerDead.png').convert_alpha()
+        dead_frame_width = dead_sheet.get_width() // 6
+        dead_frame_height = dead_sheet.get_height()
+
         for i in range(8):
             frame = sprite_sheet.subsurface(i * frame_width, 0, frame_width, frame_height)
             frame = pygame.transform.scale(frame,(int(frame_width * scale), int(frame_height * scale)))
             self.frames.append(frame)
 
-        self.surf = self.frames[0]
-        self.hitbox = pygame.Rect(self.rect.x - 0, self.rect.y + 0, 60, 145)
-        self.speed = PLAYER_VELOCITY
+
 
         for i in range(5):
             frame = attack_sheet.subsurface( i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
             frame = pygame.transform.scale(frame,(int(frame_width * scale), int(frame_height * scale)))
             self.attack_frames.append(frame)
 
-
         self.surf = self.frames[0]
-        self.rect = self.surf.get_rect(topleft = position)
+        self.rect = self.surf.get_rect(topleft=position)
+        self.surf = self.frames[0]
+        self.hitbox = pygame.Rect(self.rect.x - 0, self.rect.y + 0, 60, 145)
+        self.speed = PLAYER_VELOCITY
+
+        for i in range(6):
+            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height )
+            frame = pygame.transform.scale(frame,(int(dead_frame_width * PLAYER_SPRITE_SCALE),int(attack_frame_height * PLAYER_SPRITE_SCALE)))
+            self.dead_frames.append(frame)
+        self.surf = self.frames[0]
+        self.rect = self.surf.get_rect(topleft=position)
+
+    def take_damage(self, amount: int = 1):
+        if self.dead or self.dying:
+            return
+        self.health -= amount
+        if self.health <= 0:
+            self.health = 0
+            self.dying = True
+            self.dead_frame = 0
+            self.attack_hitbox = None
+
+    def player_health_bar(self, window: pygame.Surface):
+        bar_w, bar_h = 250, 15
+        bx = 10
+        by = 30
+        pygame.draw.rect(window, (80, 0, 0), (bx, by, bar_w, bar_h))
+        filled = int(bar_w * self.health / self.max_health)
+
+        pygame.draw.rect(window, (0, 255, 0), (bx, by, filled, bar_h))
+        pygame.draw.rect(window, (200, 200, 200), (bx, by, bar_w, bar_h), 1)
+
+    def death_animation(self):
+        self.dead_frame += self.dead_speed
+        if self.dead_frame >= len(self.dead_frames):
+            self.dead = True
+            self.dying = False
+            return
+        feet = self.rect.midbottom
+        frame = self.dead_frames[int(self.dead_frame)]
+        self.surf = frame
+        self.rect = self.surf.get_rect(midbottom=feet)
+
 
 
 
@@ -91,6 +142,11 @@ class Player(Entity):
         self.hitbox.bottom = self.rect.bottom
 
     def move(self):
+        if self.dying:
+            self.death_animation()
+            return
+        if self.dead:
+            return
         if self.attacking:
             self.attack_animation()
             return

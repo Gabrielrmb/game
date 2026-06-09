@@ -38,6 +38,9 @@ class Level:
             clock.tick(60)
 
             player = next(ent for ent in self.entity_list if isinstance(ent, Player))
+            if player.dead:
+                pygame.mixer_music.stop()
+                return "GAME OVER", self.window.copy()
 
             for ent in self.entity_list:
                 if isinstance(ent, Enemy):
@@ -60,7 +63,7 @@ class Level:
 
 
 
-            self.level_text(14, f'{self.name} - Timeout: {self.timeout / 1000:.1f}s', C_GRAY, (10, 5))
+            self.level_text(14, f'Health: ', C_GRAY, (10, 5))
             self.level_text(14, f'fps: {clock.get_fps():.0f}', C_GRAY, (10, WINDOW_HEIGHT - 35))
             self.level_text(14, f'entidades: {len(self.entity_list)}', C_GRAY, (10, WINDOW_HEIGHT - 20))
             pygame.display.flip()
