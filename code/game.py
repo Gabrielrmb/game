@@ -4,6 +4,7 @@ from code.const import WINDOW_WIDTH, WINDOW_HEIGHT, MENU_OPTION
 from code.gameover import GameOver
 from code.level import Level
 from code.menu import Menu
+from code.victory import Victory
 
 
 class Game:
@@ -25,7 +26,10 @@ class Game:
                    if state =="GAME OVER":
                         game_over = GameOver(self.window, last_frame)
                         game_over.run()
-            elif menu_return == MENU_OPTION[2]:
+                   elif state == "VICTORY":
+                       victory = Victory(self.window, last_frame)
+                       victory.run()
+            elif menu_return == MENU_OPTION[1]:
                 pygame.quit()
                 quit()
             else:

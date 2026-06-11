@@ -3,11 +3,12 @@ import pygame
 from code.const import WINDOW_HEIGHT, PLAYER_MOVE_LIM, WINDOW_WIDTH, PLAYER_VELOCITY, PLAYER_SPRITE_SCALE, PLAYER_HEALTH
 from code.entity import Entity
 
+
 class Player(Entity):
 
     def __init__(self, name: str, position: tuple):
         super().__init__(name, position)
-        #Walk
+        # Walk
         self.frames = []
         self.current_frame = 0
         self.animation_speed = 0.15
@@ -16,7 +17,7 @@ class Player(Entity):
         frame_height = sprite_sheet.get_height()
         scale = PLAYER_SPRITE_SCALE
 
-        #Attack
+        # Attack
         self.attack_frames = []
         self.attacking = False
         self.attack_key_pressed = False
@@ -27,11 +28,11 @@ class Player(Entity):
         attack_frame_width = attack_sheet.get_width() // 5
         attack_frame_height = attack_sheet.get_height()
 
-        #Sound Attack:
+        # Sound Attack:
         self.sword_attack_sound = pygame.mixer.Sound('./assets/swordAttack.mp3')
         self.hit_registered = False
 
-        #health
+        # health
         self.health = PLAYER_HEALTH
         self.max_health = PLAYER_HEALTH
         self.dead_frames = []
@@ -45,14 +46,12 @@ class Player(Entity):
 
         for i in range(8):
             frame = sprite_sheet.subsurface(i * frame_width, 0, frame_width, frame_height)
-            frame = pygame.transform.scale(frame,(int(frame_width * scale), int(frame_height * scale)))
+            frame = pygame.transform.scale(frame, (int(frame_width * scale), int(frame_height * scale)))
             self.frames.append(frame)
 
-
-
         for i in range(5):
-            frame = attack_sheet.subsurface( i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
-            frame = pygame.transform.scale(frame,(int(frame_width * scale), int(frame_height * scale)))
+            frame = attack_sheet.subsurface(i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
+            frame = pygame.transform.scale(frame, (int(frame_width * scale), int(frame_height * scale)))
             self.attack_frames.append(frame)
 
         self.surf = self.frames[0]
@@ -62,8 +61,9 @@ class Player(Entity):
         self.speed = PLAYER_VELOCITY
 
         for i in range(6):
-            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height )
-            frame = pygame.transform.scale(frame,(int(dead_frame_width * PLAYER_SPRITE_SCALE),int(attack_frame_height * PLAYER_SPRITE_SCALE)))
+            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height)
+            frame = pygame.transform.scale(frame, (int(dead_frame_width * PLAYER_SPRITE_SCALE),
+                                                   int(attack_frame_height * PLAYER_SPRITE_SCALE)))
             self.dead_frames.append(frame)
         self.surf = self.frames[0]
         self.rect = self.surf.get_rect(topleft=position)
@@ -99,9 +99,6 @@ class Player(Entity):
         self.surf = frame
         self.rect = self.surf.get_rect(midbottom=feet)
 
-
-
-
     def animation(self):
         self.current_frame += self.animation_speed
         if self.current_frame >= len(self.frames):
@@ -136,9 +133,8 @@ class Player(Entity):
         else:
             self.attack_hitbox = None
 
-
     def update_player_hitbox(self):
-        self.hitbox.centerx = self.rect.centerx -65
+        self.hitbox.centerx = self.rect.centerx - 65
         self.hitbox.bottom = self.rect.bottom
 
     def move(self):
@@ -164,19 +160,19 @@ class Player(Entity):
 
         moving = False
 
-        if pressed_key[pygame.K_LEFT] and self.rect.left >= 0:
+        if pressed_key[pygame.K_a] and self.rect.left >= 0:
             self.rect.centerx -= self.speed
             moving = True
 
-        if pressed_key[pygame.K_RIGHT] and self.rect.right < WINDOW_WIDTH + 125:
+        if pressed_key[pygame.K_d] and self.rect.right < WINDOW_WIDTH + 125:
             self.rect.centerx += self.speed
             moving = True
 
-        if pressed_key[pygame.K_UP] and self.rect.top > PLAYER_MOVE_LIM:
+        if pressed_key[pygame.K_w] and self.rect.top > PLAYER_MOVE_LIM:
             self.rect.centery -= self.speed
             moving = True
 
-        if pressed_key[pygame.K_DOWN] and self.rect.bottom < WINDOW_HEIGHT:
+        if pressed_key[pygame.K_s] and self.rect.bottom < WINDOW_HEIGHT:
             self.rect.centery += self.speed
             moving = True
 

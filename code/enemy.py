@@ -1,17 +1,15 @@
-
 import pygame
-from code.entity import Entity
+
 from code.const import ENEMY_SPRITE_SCALE, ENEMY_ATTACK_RANGE, ENEMY_VELOCITY, ENEMY_HEALTH
+from code.entity import Entity
 
 
 class Enemy(Entity):
 
-
-
-    def __init__(self, name:str, position:tuple):
+    def __init__(self, name: str, position: tuple):
         super().__init__(name, position)
 
-        #Walk
+        # Walk
         self.frames = []
         self.current_frame = 0
         self.animation_speed = 0.10
@@ -20,7 +18,7 @@ class Enemy(Entity):
         frame_width = sprite_sheet.get_width() // 7
         frame_height = sprite_sheet.get_height()
 
-        #Attack
+        # Attack
         self.attack_frames = []
         self.attacking = False
         self.attack_frame = 0
@@ -31,7 +29,7 @@ class Enemy(Entity):
         attack_frame_width = attack_sheet.get_width() // 5
         attack_frame_height = attack_sheet.get_height()
 
-        #Health
+        # Health
         self.health = ENEMY_HEALTH
         self.max_health = ENEMY_HEALTH
         self.dead_frames = []
@@ -43,31 +41,31 @@ class Enemy(Entity):
         dead_frame_width = dead_sheet.get_width() // 4
         dead_frame_height = dead_sheet.get_height()
 
-
-
-
-        #Walk
+        # Walk
         for i in range(7):
-            frame = sprite_sheet.subsurface(i * frame_width, 0, frame_width, frame_height )
-            frame = pygame.transform.scale(frame,(int(frame_width * ENEMY_SPRITE_SCALE), int(frame_height * ENEMY_SPRITE_SCALE)))
+            frame = sprite_sheet.subsurface(i * frame_width, 0, frame_width, frame_height)
+            frame = pygame.transform.scale(frame, (int(frame_width * ENEMY_SPRITE_SCALE),
+                                                   int(frame_height * ENEMY_SPRITE_SCALE)))
             self.frames.append(frame)
 
         self.surf = self.frames[0]
         self.rect = self.surf.get_rect(topleft=position)
         self.hitbox = pygame.Rect(self.rect.x + 60, self.rect.y + 20, 60, 140)
 
-        #Attack
+        # Attack
         for i in range(5):
             frame = attack_sheet.subsurface(i * attack_frame_width, 0, attack_frame_width, attack_frame_height)
-            frame = pygame.transform.scale(frame,(int(attack_frame_width * ENEMY_SPRITE_SCALE ), int(attack_frame_height * ENEMY_SPRITE_SCALE)))
+            frame = pygame.transform.scale(frame, (int(attack_frame_width * ENEMY_SPRITE_SCALE),
+                                                   int(attack_frame_height * ENEMY_SPRITE_SCALE)))
             self.attack_frames.append(frame)
         self.surf = self.frames[0]
-        self.rect = self.surf.get_rect(topleft = position)
+        self.rect = self.surf.get_rect(topleft=position)
 
-        #Dead
+        # Dead
         for i in range(4):
-            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height )
-            frame = pygame.transform.scale(frame,(int(dead_frame_width * ENEMY_SPRITE_SCALE),int(attack_frame_height * ENEMY_SPRITE_SCALE)))
+            frame = dead_sheet.subsurface(i * dead_frame_width, 0, dead_frame_width, dead_frame_height)
+            frame = pygame.transform.scale(frame, (int(dead_frame_width * ENEMY_SPRITE_SCALE),
+                                                   int(attack_frame_height * ENEMY_SPRITE_SCALE)))
             self.dead_frames.append(frame)
         self.surf = self.frames[0]
         self.rect = self.surf.get_rect(topleft=position)
@@ -137,7 +135,7 @@ class Enemy(Entity):
         if 3 <= int(self.attack_frame) <= 4:
             self.attack_hitbox = pygame.Rect(
                 self.rect.left - 10,
-                self.rect.top + 100 ,80, 70
+                self.rect.top + 100, 80, 70
             )
         else:
             self.attack_hitbox = None
@@ -154,9 +152,7 @@ class Enemy(Entity):
             return
 
         self.rect.centerx -= self.speed
-        self.walk_animation(facing_left = True)
-
-
+        self.walk_animation(facing_left=True)
 
     def chase(self, player_rect: pygame.Rect):
         if self.dying:
@@ -166,7 +162,7 @@ class Enemy(Entity):
             return
 
         dx = player_rect.centerx - self.rect.centerx
-        dy = player_rect.centery- self.rect.centery
+        dy = player_rect.centery - self.rect.centery
         distance = (dx ** 2 + dy ** 2) ** 0.5
 
         facing_left = True
@@ -183,7 +179,7 @@ class Enemy(Entity):
         if distance < self.speed:
             self.rect.centerx = player_rect.centerx
             self.rect.centery = player_rect.centery
-            self.walk_animation(facing_left = True)
+            self.walk_animation(facing_left=True)
             return
 
         if distance != 0:
@@ -192,6 +188,4 @@ class Enemy(Entity):
         self.rect.centerx += round(dx)
         self.rect.centery += round(dy)
 
-
         self.walk_animation(facing_left)
-

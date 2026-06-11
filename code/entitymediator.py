@@ -1,5 +1,4 @@
 import pygame
-from pygame.mixer import Sound
 
 from code.enemy import Enemy
 from code.player import Player
@@ -27,8 +26,9 @@ class EntityMediator:
 
                         if not player.hit_registered:
                             EntityMediator.sword_hit_sound.play()
+                            EntityMediator.sword_hit_sound.set_volume(0.8)
+
                             player.hit_registered = True
-                            print("inimigo atingido")
                             ent.take_damage(1)
 
                 if ent.attack_hitbox:
@@ -37,39 +37,17 @@ class EntityMediator:
                             ent.hit_registered = True
                             player.take_damage(1)
 
-                            print('Player atingido!')
-
         for enemy in enemies_remove:
             entity_list.remove(enemy)
 
-
-
-
     @staticmethod
-    def draw_hitbox(window, entity_list):
+    def draw_life_bar(window, entity_list):
         player = next((ent for ent in entity_list if isinstance(ent, Player)), None)
 
-        #Player attack hitbox
-        if player and player.attack_hitbox:
-            pygame.draw.rect(window, (255,0,0), player.attack_hitbox, 2)
-        if player:
-            pygame.draw.rect(window, (0,0,255), player.hitbox, 2)
         if player:
             player.player_health_bar(window)
-            pygame.draw.rect(window, (0,255,0), player.hitbox, 2)
 
-
-
-
-        #enemy body hitbox
         for ent in entity_list:
             if isinstance(ent, Enemy):
                 if not ent.dead:
                     ent.enemy_health_bar(window)
-                if not ent.dead and not ent.dying:
-                    pygame.draw.rect(window, (0,255,0), ent.hitbox, 2)
-
-                if ent.attack_hitbox:
-                    pygame.draw.rect(
-                        window, (255,255,0), ent.attack_hitbox, 2)
-
